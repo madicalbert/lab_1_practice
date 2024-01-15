@@ -1,0 +1,87 @@
+---
+title: "Lab 1"
+author: "Madi Calbert"
+format: 
+  html:
+    code-fold: true
+    toc: true
+execute: 
+  echo: true
+  message: false
+  warning: false
+editor: visual
+---
+
+1.  Create a new Quarto document. If you like, set up the header for code folding. Set echo, message, and warning like we did in lab.
+2.  Attach tidyverse and the gapminder package.
+3.  For each year and continent, summarize the average per capita GDP across all countries in the continent. Hint: don't just average the country-level values - need to consider country populations!
+4.  Plot the continent-level GDP values in a scatter plot. Bonus, plot the country level values as well, with a low alpha to fade them into the background.
+5.  Redo the scatter plot but his time, log transform the GDP data (either in the data frame using 'mutate', or on the plot with 'scale_y_log10()').
+
+```{r}
+library(tidyverse)
+library(gapminder)
+
+view(gapminder)
+```
+
+```{r}
+gdp_data <- gapminder %>% group_by(continent, year) %>% summarise(mean = mean(gdpPercap))
+
+gdp_data
+
+```
+
+```{r}
+gdp_plot <- ggplot(data = gdp_data, aes(x = year, y = mean, color = continent)) + geom_point() + labs(x = "Year", y = "Mean Per Capita GDP", color = "Continent", title = "Continent-Level GDP Values by Year") + theme_minimal()
+
+gdp_plot
+```
+
+```{r}
+gdp_plot_log <- ggplot(data = gdp_data, aes(x = year, y = mean, color = continent)) + geom_point() + labs(x = "Year", y = "Log Mean Per Capita GDP", color = "Continent", title = "Continent-Level Log GDP Values by Year") + theme_minimal() + scale_y_log10()
+
+gdp_plot_log
+```
+
+```{r}
+gdp_plot <- ggplot(data = gdp_data, aes(x = year, y = mean, color = continent)) + geom_point() + labs(x = "Year", y = "Mean Per Capita GDP", color = "Continent", title = "Continent-Level GDP Values by Year") + theme_minimal() + geom_smooth(method = "lm", se = FALSE)
+
+gdp_plot
+```
+
+```{r}
+gdp_plot_log <- ggplot(data = gdp_data, aes(x = year, y = mean, color = continent)) + geom_point() + labs(x = "Year", y = "Log Mean Per Capita GDP", color = "Continent", title = "Continent-Level Log GDP Values by Year") + theme_minimal() + scale_y_log10() + geom_smooth(method = "lm", se = FALSE)
+
+gdp_plot_log
+```
+
+```{r}
+linear_model <- lm((mean) ~ continent, data = gdp_data)
+
+summary(linear_model)
+```
+
+-   Based on the plots, choose either regular or log transformed data, and use a linear regression to estimate annual change in per capita GDP \*\* or \*\* log(per capita GDP) accounting for continent.
+
+-   Write a sentence or two describing the trends in the plots.
+
+The mean per capita GDP's for all of the continents are increasing from 1952 to 2007. Oceania has the high per capita GDP.
+
+-   Write a sentence or two to explain the coefficients in the linear model, including statistical significance.
+
+    The coefficients are explaining the statistical significance compared to the mean GDP of Africa. All of the coefficients are less than our alpha of 0.05, so all of the other continents have a statistically significnat difference in mean GDP compared to Africa.
+
+    -   Which continent is the "reference" continent? why might that be?
+
+        Africa is the reference continent because it is organized alphabetically.
+
+    -   What do the coefficients on each continent represent? Do these make intuitive sense?
+
+        The coefficients represent the slope of the lines for each continent.
+
+-   Does a linear model seem like a good way to approach these data? why or why not?
+
+    Yes, if you test all of the assumptions for linearity.
+
+When done, Render your Quarto doc, then stage, commit, and push back to github. Congrats you did it!
